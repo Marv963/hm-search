@@ -1,7 +1,5 @@
-import Badge, { badge } from "./Badge.astro";
+import Badge from "./Badge.astro";
 
-const BadgeVariants = { badge };
-
-export { Badge, BadgeVariants };
+export { Badge };
 
 export default Badge;

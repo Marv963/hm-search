@@ -1,7 +1,5 @@
-import Input, { input } from "./Input.astro";
+import Input from "./Input.astro";
 
-const InputVariants = { input };
-
-export { Input, InputVariants };
+export { Input };
 
 export default Input;

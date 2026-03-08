@@ -30,12 +30,7 @@ const { currentRelease = "master" } = Astro.props;
       />
     </div>
 
-    <Select
-      id="release-select"
-      name="release"
-      value={currentRelease}
-      client:load
-    >
+    <Select id="release-select" name="release" value={currentRelease}>
       <SelectTrigger className="w-full md:w-[180px]">
         <SelectValue placeholder="Select release" />
       </SelectTrigger>
@@ -53,8 +48,8 @@ const { currentRelease = "master" } = Astro.props;
       <span class="text-muted-foreground font-medium">Search in:</span>
     </div>
 
-    <Checkbox id="search-title" label="Title" checked={true} client:load />
+    <Checkbox id="search-title" label="Title" checked={true} />
 
-    <Checkbox id="search-desc" label="Description" checked={true} client:load />
+    <Checkbox id="search-desc" label="Description" checked={true} />
   </div>
 </div>
