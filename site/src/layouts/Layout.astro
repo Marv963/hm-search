@@ -1,0 +1,144 @@
+---
+import "@/styles/starwind.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Search Home Manager configuration options" } =
+  Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>{title}</title>
+  </head>
+  <body class="bg-background flex min-h-screen flex-col font-sans antialiased">
+    <!-- Header -->
+    <header
+      class="bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur"
+    >
+      <div class="container mx-auto flex h-14 max-w-7xl items-center px-4">
+        <!-- Logo -->
+        <div class="mr-4 flex">
+          <a
+            href="/"
+            class="hover:text-primary flex items-center space-x-2 text-lg font-bold tracking-tight transition-colors"
+          >
+            <span class="text-primary">HOME MANAGER</span>
+          </a>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex flex-1 items-center space-x-6 text-sm font-medium">
+          <a
+            href="https://nix-community.github.io/home-manager/"
+            class="hover:text-foreground/80 text-foreground/60 transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Documentation
+          </a>
+          <a
+            href="/"
+            class="hover:text-foreground text-foreground transition-colors"
+          >
+            Options
+          </a>
+          <a
+            href="https://github.com/nix-community/home-manager"
+            class="hover:text-foreground/80 text-foreground/60 transition-colors"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Project Page
+          </a>
+        </nav>
+
+        <!-- GitHub -->
+        <div class="flex items-center space-x-4">
+          <a
+            href="https://github.com/nix-community/home-manager"
+            class="focus-visible:ring-ring ring-offset-background hover:bg-accent hover:text-accent-foreground inline-flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+          >
+            <i class="ti ti-brand-github text-xl"></i>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="container mx-auto max-w-7xl flex-1 px-4 py-6">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t py-6 md:py-0">
+      <div
+        class="container mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 md:h-16 md:flex-row"
+      >
+        <p class="text-muted-foreground text-sm">
+          Built with <a
+            href="https://astro.build"
+            class="hover:text-foreground font-medium underline underline-offset-4"
+            >Astro</a
+          > and <a
+            href="https://starwind.dev"
+            class="hover:text-foreground font-medium underline underline-offset-4"
+            >Starwind</a
+          >
+        </p>
+        <p class="text-muted-foreground text-sm">
+          Data from <a
+            href="https://github.com/nix-community/home-manager"
+            class="hover:text-foreground font-medium underline underline-offset-4"
+            >Home Manager</a
+          >
+        </p>
+      </div>
+    </footer>
+
+    <!-- Inline data for client-side JS -->
+    <slot name="data-scripts" />
+  </body>
+</html>
+
+<style is:global>
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+
+  /* Code blocks in dialog */
+  .nix-code {
+    background: hsl(var(--muted));
+    padding: 0.75rem;
+    border-radius: var(--radius);
+    font-family: ui-monospace, monospace;
+    font-size: 0.875rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+</style>

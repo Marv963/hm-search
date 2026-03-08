@@ -1,0 +1,76 @@
+---
+import type { Option } from "@/types/option";
+import { DialogTrigger } from "@/components/starwind/dialog";
+
+interface Props {
+  options: Option[];
+}
+
+const { options } = Astro.props;
+---
+
+<div class="overflow-hidden rounded-lg border">
+  <table class="w-full table-fixed border-collapse">
+    <thead class="bg-muted/50 border-b">
+      <tr>
+        <th class="w-2/5 px-4 py-3 text-left align-top text-sm font-medium"
+          >Option Name</th
+        >
+        <th
+          class="hidden w-2/5 px-4 py-3 text-left align-top text-sm font-medium md:table-cell"
+          >Description</th
+        >
+        <th
+          class="hidden w-1/5 px-4 py-3 text-left align-top text-sm font-medium lg:table-cell"
+          >Type</th
+        >
+      </tr>
+    </thead>
+    <tbody id="options-tbody" class="divide-y">
+      {
+        options.map((option) => (
+          <tr
+            class="hover:bg-muted/50 cursor-pointer align-top transition-colors"
+            data-option={JSON.stringify(option)}
+          >
+            <td class="px-4 py-3 align-top">
+              <div class="flex min-w-0 items-start gap-2">
+                <i class="ti ti-git-branch text-muted-foreground mt-0.5 flex-shrink-0 text-sm" />
+                <span class="text-foreground font-mono text-sm break-all">
+                  {option.name}
+                </span>
+              </div>
+            </td>
+            <td class="hidden px-4 py-3 align-top md:table-cell">
+              <p class="text-muted-foreground line-clamp-3 text-sm break-words">
+                {option.description}
+              </p>
+            </td>
+            <td class="hidden px-4 py-3 align-top lg:table-cell">
+              <code class="bg-muted inline-block max-w-full rounded px-2 py-1 text-xs break-all">
+                {option.type}
+              </code>
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+
+  <div id="no-results" class="text-muted-foreground hidden py-12 text-center">
+    <i class="ti ti-search mb-2 block text-4xl opacity-50"></i>
+    <p>No options found matching your search.</p>
+  </div>
+</div>
+
+<style>
+  table {
+    table-layout: fixed;
+  }
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

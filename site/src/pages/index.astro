@@ -1,0 +1,216 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SearchHeader from "@/components/search/SearchHeader.astro";
+import SearchControls from "@/components/search/SearchControls.astro";
+import OptionsTable from "@/components/search/OptionsTable.astro";
+import OptionDetailDialog from "@/components/search/OptionDetailDialog.astro";
+import type { OptionsData } from "@/types/option";
+import optionsData from "@/data/options-master.json";
+const { last_update, count, options } = optionsData as OptionsData;
+const release = Astro.url.searchParams.get("release") || "master";
+---
+
+<Layout title="Home Manager Options Search">
+  <div class="space-y-6">
+    <SearchHeader lastUpdate={last_update} totalCount={count} />
+    <SearchControls currentRelease={release} />
+    <OptionsTable options={options} />
+    <OptionDetailDialog />
+  </div>
+
+  <!-- Daten für Client-Scripts verfügbar machen -->
+  <script
+    id="options-data"
+    type="application/json"
+    set:html={JSON.stringify(options)}
+  />
+
+  <!-- Client Script -->
+  <script>
+    import { initSearch, search } from "@/lib/search-client";
+    import { parseDescription, escapeHtml } from "@/lib/parser";
+    import type { Option } from "@/types/option";
+
+    // Initialisierung
+    const allOptions: Option[] = JSON.parse(
+      document.getElementById("options-data")?.textContent || "[]",
+    );
+    initSearch(allOptions);
+
+    // DOM Elemente
+    const searchInput = document.getElementById(
+      "search-input",
+    ) as HTMLInputElement;
+    const searchTitleCb = document.querySelector(
+      "#search-title input",
+    ) as HTMLInputElement;
+    const searchDescCb = document.querySelector(
+      "#search-desc input",
+    ) as HTMLInputElement;
+    const resultCount = document.getElementById("result-count");
+    const tbody = document.getElementById("options-tbody");
+    const noResults = document.getElementById("no-results");
+
+    // Dialog Elemente (wichtig: das ist das native <dialog> Element)
+    const dialogWrapper = document.getElementById("option-dialog");
+    const dialogElement = dialogWrapper?.querySelector(
+      "dialog",
+    ) as HTMLDialogElement | null;
+    const dialogTitle = document.getElementById("dialog-title");
+    const dialogBody = document.getElementById("dialog-body");
+
+    // Search Logic
+    function updateResults() {
+      const query = searchInput?.value || "";
+      const inTitle = searchTitleCb?.checked ?? true;
+      const inDesc = searchDescCb?.checked ?? true;
+      const results = search(query, inTitle, inDesc);
+      const resultNames = new Set(results.map((r) => r.name));
+
+      let visible = 0;
+      tbody?.querySelectorAll("tr").forEach((row) => {
+        const opt = JSON.parse(row.getAttribute("data-option") || "{}");
+        const isVisible = resultNames.has(opt.name);
+        row.classList.toggle("hidden", !isVisible);
+        if (isVisible) visible++;
+      });
+
+      if (resultCount) resultCount.textContent = visible.toString();
+      noResults?.classList.toggle("hidden", visible > 0);
+      tbody?.classList.toggle("hidden", visible === 0);
+    }
+
+    // Debounce
+    let timer: ReturnType<typeof setTimeout>;
+    const debouncedSearch = () => {
+      clearTimeout(timer);
+      timer = setTimeout(updateResults, 100);
+    };
+
+    searchInput?.addEventListener("input", debouncedSearch);
+    searchTitleCb?.addEventListener("change", debouncedSearch);
+    searchDescCb?.addEventListener("change", debouncedSearch);
+
+    // DIALOG LOGIK
+    tbody?.addEventListener("click", (e) => {
+      const row = (e.target as HTMLElement).closest("tr");
+      if (!row) return;
+
+      const option: Option = JSON.parse(
+        row.getAttribute("data-option") || "{}",
+      );
+      if (!option.name || !dialogBody) return;
+
+      // Dialog mit Daten befüllen
+      if (dialogTitle) dialogTitle.textContent = option.name;
+
+      // HTML zusammenbauen
+      const sections = [];
+
+      if (option.description) {
+        sections.push(`
+          <div>
+            <h3 class="text-sm font-semibold mb-2 flex items-center gap-2">
+              <i class="ti ti-file-description"></i> Description
+            </h3>
+            <div class="text-sm text-muted-foreground leading-relaxed">
+              ${parseDescription(option.description)}
+            </div>
+          </div>
+        `);
+      }
+
+      sections.push(`
+        <div>
+          <h3 class="text-sm font-semibold mb-2">Type</h3>
+          <code class="bg-muted px-3 py-2 rounded block font-mono text-sm">${escapeHtml(option.type)}</code>
+        </div>
+      `);
+
+      if (option.default) {
+        sections.push(`
+          <div>
+            <h3 class="text-sm font-semibold mb-2">Default</h3>
+            <pre class="bg-muted p-3 rounded overflow-x-auto text-sm font-mono"><code>${escapeHtml(option.default)}</code></pre>
+          </div>
+        `);
+      }
+
+      if (option.example) {
+        sections.push(`
+          <div>
+            <h3 class="text-sm font-semibold mb-2">Example</h3>
+            <pre class="bg-muted p-3 rounded overflow-x-auto text-sm font-mono"><code>${escapeHtml(option.example)}</code></pre>
+          </div>
+        `);
+      }
+
+      if (option.declarations?.length) {
+        const decls = option.declarations
+          .map((d) => {
+            const name = escapeHtml(d.name);
+            return d.url
+              ? `<div class="flex items-center gap-2 text-sm"><i class="ti ti-git-branch text-muted-foreground"></i><a href="${d.url}" target="_blank" class="text-primary hover:underline">${name}</a></div>`
+              : `<div class="flex items-center gap-2 text-sm text-muted-foreground"><i class="ti ti-git-branch"></i>${name}</div>`;
+          })
+          .join("");
+
+        sections.push(`
+          <div>
+            <h3 class="text-sm font-semibold mb-2">Declared by</h3>
+            <div class="space-y-1">${decls}</div>
+          </div>
+        `);
+      }
+
+      if (option.readOnly) {
+        sections.push(
+          `<span class="inline-flex items-center rounded-full bg-destructive text-destructive-foreground px-2.5 py-0.5 text-xs font-semibold w-fit">Read Only</span>`,
+        );
+      }
+
+      dialogBody.innerHTML = sections.join("");
+
+      // WICHTIG: Dialog öffnen via native HTML Dialog API
+      if (dialogElement) {
+        dialogElement.showModal();
+
+        // Animation-State für Starwind setzen (falls nötig)
+        dialogElement.setAttribute("data-state", "open");
+        dialogWrapper?.setAttribute("data-state", "open");
+      }
+    });
+
+    // Backdrop-Click zum Schließen ermöglichen
+    dialogElement?.addEventListener("click", (e) => {
+      const rect = dialogElement.getBoundingClientRect();
+      const isInDialog =
+        rect.top <= e.clientY &&
+        e.clientY <= rect.top + rect.height &&
+        rect.left <= e.clientX &&
+        e.clientX <= rect.left + rect.width;
+
+      if (!isInDialog) {
+        dialogElement.close();
+        dialogElement.setAttribute("data-state", "closed");
+        dialogWrapper?.setAttribute("data-state", "closed");
+      }
+    });
+
+    // Release Change Handler
+    document
+      .getElementById("release-select")
+      ?.addEventListener("starwind-select:change", (e: any) => {
+        const url = new URL(window.location.href);
+        url.searchParams.set("release", e.detail.value);
+        window.location.href = url.toString();
+      });
+
+    // Init von URL params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("query")) {
+      searchInput.value = params.get("query")!;
+      updateResults();
+    }
+  </script>
+</Layout>

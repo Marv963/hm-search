@@ -1,0 +1,28 @@
+---
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/starwind/dialog";
+import { Button } from "@/components/starwind/button";
+---
+
+<Dialog id="option-dialog" client:load>
+  <DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle className="font-mono text-lg break-all" id="dialog-title">
+        Option Details
+      </DialogTitle>
+    </DialogHeader>
+    <div class="mt-4 space-y-6" id="dialog-body">
+      <!-- Content wird per JS eingefügt -->
+    </div>
+    <div class="mt-6 flex justify-end">
+      <DialogClose asChild>
+        <Button variant="outline">Close</Button>
+      </DialogClose>
+    </div>
+  </DialogContent>
+</Dialog>

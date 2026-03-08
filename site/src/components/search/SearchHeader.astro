@@ -1,0 +1,23 @@
+---
+import { Badge } from "@/components/starwind/badge";
+
+interface Props {
+  lastUpdate: string;
+  totalCount: number;
+}
+
+const { lastUpdate, totalCount } = Astro.props;
+---
+
+<div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+  <div>
+    <h1 class="text-3xl font-bold tracking-tight">Options Search</h1>
+    <p class="text-muted-foreground mt-1 text-sm">
+      <i class="ti ti-calendar mr-1 inline"></i>
+      Last update: {lastUpdate}
+    </p>
+  </div>
+  <Badge variant="secondary" className="w-fit">
+    <span id="result-count">{totalCount}</span> options
+  </Badge>
+</div>

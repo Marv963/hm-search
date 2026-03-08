@@ -1,0 +1,60 @@
+---
+import { Input } from "@/components/starwind/input";
+import { Checkbox } from "@/components/starwind/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/starwind/select";
+
+interface Props {
+  currentRelease?: string;
+}
+
+const { currentRelease = "master" } = Astro.props;
+---
+
+<div class="bg-card space-y-4 rounded-lg border p-4">
+  <!-- Search & Release -->
+  <div class="flex flex-col gap-4 md:flex-row">
+    <div class="relative flex-1">
+      <i
+        class="ti ti-search text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2"
+      ></i>
+      <Input
+        id="search-input"
+        placeholder="Search options (e.g., git, vim, services.postgresql)..."
+        className="pl-10"
+      />
+    </div>
+
+    <Select
+      id="release-select"
+      name="release"
+      value={currentRelease}
+      client:load
+    >
+      <SelectTrigger className="w-full md:w-[180px]">
+        <SelectValue placeholder="Select release" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="master">master</SelectItem>
+        <SelectItem value="stable">stable</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex flex-wrap items-center gap-6 text-sm">
+    <div class="flex items-center space-x-2">
+      <i class="ti ti-filter text-muted-foreground"></i>
+      <span class="text-muted-foreground font-medium">Search in:</span>
+    </div>
+
+    <Checkbox id="search-title" label="Title" checked={true} client:load />
+
+    <Checkbox id="search-desc" label="Description" checked={true} client:load />
+  </div>
+</div>
